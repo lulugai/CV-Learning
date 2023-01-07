@@ -15,6 +15,7 @@ class HandDetector():
                                         min_detection_confidence=min_detection_confidence,
                                         min_tracking_confidence=min_tracking_confidence)
         self.mpDraw = mp.solutions.drawing_utils
+        self.tipids = [4, 8, 12, 16, 20]
 
     def findhands(self, img, draw=True):
         imgrgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -25,16 +26,30 @@ class HandDetector():
                     self.mpDraw.draw_landmarks(img, handLms, self.mphands.HAND_CONNECTIONS)
         return img
     def findpositions(self, img, handnum=0, draw=True):
-        Lmlist = []
+        self.Lmlist = []
         h, w, c = img.shape
         if self.results.multi_hand_landmarks:
             myhand = self.results.multi_hand_landmarks[handnum]
             for id, lm in enumerate(myhand.landmark):
                 cx, cy = int(lm.x * w), int(lm.y * h)
-                Lmlist.append([id, cx, cy])
+                self.Lmlist.append([id, cx, cy])
                 if draw:
                     cv2.circle(img, (cx, cy), 15, (255,0,255), cv2.FILLED)
-        return Lmlist
+        return self.Lmlist
+    def fingersUp(self):
+        fingers = []
+        #Thumb
+        if self.Lmlist[self.tipids[0]][1] > self.Lmlist[self.tipids[0]-1][1]:
+            fingers.append(1)
+        else:
+            fingers.append(0)
+        # 4 fingers
+        for id in range(1, 5):
+            if self.Lmlist[self.tipids[id]][2] < self.Lmlist[self.tipids[id]-2][2]:
+                fingers.append(1)
+            else:
+                fingers.append(0)
+        return fingers
 
 def main():
     cap = cv2.VideoCapture(0)
