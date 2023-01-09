@@ -27,7 +27,7 @@ def main():
     while True:
         success, img = cap.read()
         img = detector.findhands(img)    
-        Lmlist = detector.findpositions(img, draw=False)
+        Lmlist, _ = detector.findpositions(img, draw=False)
         if len(Lmlist) != 0:
             x1, y1, x2, y2 = Lmlist[4][1], Lmlist[4][2], Lmlist[8][1], Lmlist[8][2]
             cx, cy = (x1 + x2) // 2, (y1 + y2) // 2

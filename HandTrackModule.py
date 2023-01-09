@@ -1,3 +1,4 @@
+import math
 import cv2
 import mediapipe as mp
 import time
@@ -25,6 +26,7 @@ class HandDetector():
                 if draw:
                     self.mpDraw.draw_landmarks(img, handLms, self.mphands.HAND_CONNECTIONS)
         return img
+
     def findpositions(self, img, handnum=0, draw=True):
         self.Lmlist = []
         h, w, c = img.shape
@@ -35,7 +37,23 @@ class HandDetector():
                 self.Lmlist.append([id, cx, cy])
                 if draw:
                     cv2.circle(img, (cx, cy), 15, (255,0,255), cv2.FILLED)
-        return self.Lmlist
+        return self.Lmlist, None
+
+    def findDistance(self, p1, p2, img, draw=True, r=15, t=3):
+        x1, y1 = self.Lmlist[p1][1:]
+        x2, y2 = self.Lmlist[p2][1:]
+        cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
+        color = (255, 0, 255)
+
+        if draw:
+            cv2.line(img, (x1, y1), (x2, y2), color, t)
+            cv2.circle(img, (x1, y1), r, color, cv2.FILLED)
+            cv2.circle(img, (x2, y2), r, color, cv2.FILLED)
+            cv2.circle(img, (cx, cy), r, color, cv2.FILLED)
+        length = math.hypot(x1 - x2, y1 - y2)
+        
+        return length, img, [x1, y1, x2, y2, cx, cy]
+
     def fingersUp(self):
         fingers = []
         #Thumb
@@ -62,7 +80,7 @@ def main():
     while True:
         success, img = cap.read()
         img = detector.findhands(img)    
-        Lmlist = detector.findpositions(img, draw=False)
+        Lmlist, _ = detector.findpositions(img, draw=False)
         cTime = time.time()
         fps = 1/(cTime - pTime)
         pTime = cTime

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import HandTrackModule as htm
+import autopy
 
 brushthickness = 15
 
@@ -18,7 +19,7 @@ def main():
         success, img = cap.read()
         img = cv2.flip(img, 1)
         img = detector.findhands(img)    
-        Lmlist, _ = detector.findpositions(img, draw=False)
+        Lmlist = detector.findpositions(img, draw=False)
         if len(Lmlist) != 0:
             x1, y1 = Lmlist[8][1:] 
             x2, y2 = Lmlist[12][1:]
